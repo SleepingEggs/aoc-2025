@@ -2,14 +2,10 @@ import gleam/string
 import gleam/list
 import gleam/int
 import simplifile as file
-import argv
-
-pub type Arguments {
-  Arguments(input_file: String, part: Int, message: String)
-}
+import utils/argy
 
 pub fn main() -> Nil {
-  let args = parse_args(argv.load().arguments, Arguments("./src/day1/input.txt", 1, ""))
+  let args = argy.parse_args()
   let path = args.input_file
   let assert Ok(contents) = file.read(from: path)
   let lines = string.split(contents, on: "\n")
@@ -21,15 +17,6 @@ pub fn main() -> Nil {
   }
   echo result
   Nil
-}
-
-pub fn parse_args(cmd_args: List(String), output_args: Arguments) -> Arguments {
-  case cmd_args {
-    ["-i", input_file, ..rest] -> parse_args(rest, Arguments(input_file: input_file, part: output_args.part, message: output_args.message))
-    ["-p", ..rest] -> parse_args(rest, Arguments(input_file: output_args.input_file, part: 2, message: output_args.message))
-    [] -> output_args
-    _ -> Arguments(input_file: output_args.input_file, part: output_args.part, message: "usage: gleam run src/day1/solution [-i <file_path>] [-p]")
-  }
 }
 
 pub fn convert_lines_to_numbers(lines: List(String), numbers: List(Int)) -> List(Int) {
