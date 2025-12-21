@@ -1,11 +1,11 @@
-import gleam/string
-import gleam/list
 import gleam/int
+import gleam/list
+import gleam/string
 import simplifile as file
 import utils/argy
 
 pub fn main() -> Nil {
-  let args = argy.parse_args()
+  let args = argy.parse_args(root: "./src/day1/")
   let path = args.input_file
   let assert Ok(contents) = file.read(from: path)
   let lines = string.split(contents, on: "\n")
@@ -19,9 +19,16 @@ pub fn main() -> Nil {
   Nil
 }
 
-pub fn convert_lines_to_numbers(lines: List(String), numbers: List(Int)) -> List(Int) {
+pub fn convert_lines_to_numbers(
+  lines: List(String),
+  numbers: List(Int),
+) -> List(Int) {
   case lines {
-    [line, ..rest] -> convert_lines_to_numbers(rest, list.append(numbers, [convert_line_to_num(line)]))
+    [line, ..rest] ->
+      convert_lines_to_numbers(
+        rest,
+        list.append(numbers, [convert_line_to_num(line)]),
+      )
     [] -> numbers
   }
 }
@@ -31,7 +38,8 @@ pub fn convert_line_to_num(line: String) -> Int {
     "" -> 0
     actual_line -> {
       let first_char = string.slice(from: actual_line, at_index: 0, length: 1)
-      let number_string = string.slice(from: actual_line, at_index: 1, length: 100)
+      let number_string =
+        string.slice(from: actual_line, at_index: 1, length: 100)
       let modifier = case first_char {
         "L" -> -1
         "R" -> 1

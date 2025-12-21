@@ -5,7 +5,7 @@ import simplifile as file
 import utils/argy
 
 pub fn main() -> Nil {
-  let args = argy.parse_args()
+  let args = argy.parse_args(root: "./src/day2/")
   let path = args.input_file
   let assert Ok(contents) = file.read(from: path)
   let parts = string.split(contents, ",")
