@@ -5,7 +5,7 @@ pub type Arguments {
 }
 
 pub fn parse_args(root root_path: String) -> Arguments {
-  let default_input = root_path <> "input.txt"
+  let default_input = root_path <> "sample.txt"
   parse_args_loop(argv.load().arguments, Arguments(default_input, 1, ""))
 }
 
