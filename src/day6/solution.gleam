@@ -18,7 +18,10 @@ pub fn main() -> Nil {
   let path = args.input_file
   let assert Ok(contents) = file.read(from: path)
   let lines = string.split(contents, "\n")
-  let puzzles = process_lines(lines)
+  let puzzles = case args.part {
+    2 -> process_lines_2(lines)
+    _ -> process_lines(lines)
+  }
   let result = solve(puzzles)
   echo result
   Nil
@@ -100,5 +103,87 @@ fn process_lines(lines: List(String)) -> List(PuzzleInput) {
   list.map(parsed_vals, fn(line) {
     let #(_, puzzle) = line
     puzzle
+  })
+}
+
+fn process_lines_2(lines: List(String)) -> List(PuzzleInput) {
+  let num_num_lines = list.length(lines) - 1
+  let #(parsed_vals, _) =
+    list.fold(lines, #([], 0), fn(acc, line) {
+      let #(value, curr_line) = acc
+      let #(new_value, _count, _str, _poo) =
+        list.fold(
+          string.split(line, ""),
+          #(value, 0, 0, True),
+          fn(
+            col_acc: #(
+              List(#(Int, #(List(#(Int, String)), String))),
+              Int,
+              Int,
+              Bool,
+            ),
+            char,
+          ) {
+            let #(col_list, col_count, char_count, last_is_space) = col_acc
+            let col_val = case list.key_find(col_list, col_count) {
+              Ok(found) -> found
+              Error(_) -> #([], "+")
+            }
+            case char {
+              " " -> #(
+                col_list,
+                case last_is_space {
+                  True -> col_count
+                  False -> col_count + 1
+                },
+                char_count + 1,
+                True,
+              )
+              _ -> {
+                let #(char_list, operator) = col_val
+                case curr_line == num_num_lines {
+                  True -> {
+                    let new_col_list =
+                      list.key_set(col_list, col_count, #(char_list, char))
+                    #(new_col_list, col_count, char_count + 1, False)
+                  }
+                  False -> {
+                    let char_val = case list.key_find(char_list, char_count) {
+                      Ok(found) -> found
+                      Error(_) -> ""
+                    }
+                    let new_char_list =
+                      list.key_set(
+                        char_list,
+                        char_count,
+                        string.append(char_val, char),
+                      )
+                    let new_col_list =
+                      list.key_set(col_list, col_count, #(
+                        new_char_list,
+                        operator,
+                      ))
+                    #(new_col_list, col_count, char_count + 1, False)
+                  }
+                }
+              }
+            }
+          },
+        )
+      #(new_value, curr_line + 1)
+    })
+  list.map(parsed_vals, fn(val) {
+    let #(_index, puzzle_big) = val
+    let #(stringy_puzzle, operator) = puzzle_big
+    let puzzle_numbers =
+      list.map(stringy_puzzle, fn(my_stuff) {
+        let #(_index, num_string) = my_stuff
+        let assert Ok(parsed_num) = int.parse(num_string)
+        parsed_num
+      })
+    PuzzleInput(puzzle_lines: puzzle_numbers, operation: case operator {
+      "*" -> Multiplication
+      _ -> Addition
+    })
   })
 }
